@@ -35,11 +35,11 @@
             font-size: 10px; transition: 0.3s; text-transform: uppercase;
         }
 
-        /* --- LOGO & PULSE ANIMATION --- */
+        /* --- LOGO FIX & ANIMATIONS --- */
         .logo { 
             width: 180px; 
             max-width: 60%; 
-            margin-top: 40px; 
+            margin-top: 10px; 
             margin-bottom: 10px;
             filter: contrast(1.2) brightness(1.1);
             mix-blend-mode: screen; 
@@ -51,7 +51,6 @@
             z-index: 9999; transition: opacity 0.8s ease;
         }
         
-        /* Keyframe fix added */
         .loader-logo { width: 60px; filter: invert(1); animation: pulse 1.5s infinite ease-in-out; }
 
         @keyframes pulse {
@@ -78,6 +77,9 @@
             text-align: center; color: white; background-size: cover; background-position: center;
             background-blend-mode: overlay; background-color: rgba(0,0,0,0.4);
             backface-visibility: hidden;
+            box-sizing: border-box;
+            padding-top: 50px;
+            padding-bottom: 70px;
         }
 
         .front  { transform: rotateX(0deg) translateZ(50vh); background-image: var(--primary-gradient), url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&q=80&w=1000'); }
@@ -87,19 +89,19 @@
 
         .glass-card {
             background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15); padding: 2rem;
-            border-radius: 20px; max-width: 400px; width: 80%; margin: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15); padding: 1.5rem 2rem;
+            border-radius: 20px; max-width: 400px; width: 80%; margin: 5px 10px;
         }
 
         @media (max-width: 600px) {
-            .glass-card { backdrop-filter: none; background: rgba(0, 0, 0, 0.75); padding: 1.5rem; }
+            .glass-card { backdrop-filter: none; background: rgba(0, 0, 0, 0.75); padding: 1.2rem 1.5rem; }
             h1 { font-size: 1.4rem; }
             .logo { width: 140px; }
         }
 
         /* --- SOCIAL BOTTOM BAR --- */
         .social-bottom-bar { 
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); 
             display: flex; flex-direction: row; gap: 15px; z-index: 1000; 
         }
         .social-icon {
@@ -148,7 +150,7 @@
 
     <div class="scene" id="mainScene">
         <div class="cube" id="cube">
-            <section class="face front" data-step="0">
+            <section class="face front" data-step="0" tabindex="0">
                 <img src="logo.png" alt="New Living Way Chapel" class="logo">
                 <div class="glass-card">
                     <h1>WELCOME HOME</h1>
@@ -156,19 +158,19 @@
                     <a href="#" class="btn">New Here?</a>
                 </div>
             </section>
-            <section class="face bottom" data-step="1">
+            <section class="face bottom" data-step="1" tabindex="0">
                 <div class="glass-card">
                     <h1>OUR MISSION</h1>
                     <p>Building a legacy of love, faith, and spiritual growth for everyone.</p>
                 </div>
             </section>
-            <section class="face back" data-step="2">
+            <section class="face back" data-step="2" tabindex="0">
                 <div class="glass-card">
                     <h1>COMMUNITY</h1>
                     <p>Join our weekly small groups and grow together in grace.</p>
                 </div>
             </section>
-            <section class="face top" data-step="3">
+            <section class="face top" data-step="3" tabindex="0">
                 <div class="glass-card">
                     <h1>SERVICE TIMES</h1>
                     <p>Sundays @ 8:30 AM<br>Thursdays @ 7:00 AM</p>
@@ -195,13 +197,13 @@
             setTimeout(() => { isSpinning = false; }, 850);
         }
 
-        // --- Touch Swipe Direction Corrected ---
+        // --- Touch Swipe Handling ---
         let touchStart = 0;
         window.addEventListener('touchstart', e => { touchStart = e.touches[0].clientY; }, {passive: true});
         window.addEventListener('touchend', e => {
             let touchEnd = e.changedTouches[0].clientY;
-            if (touchStart > touchEnd + 40) rotate('down');  // Swipe up moves content down
-            else if (touchStart < touchEnd - 40) rotate('up'); // Swipe down moves content up
+            if (touchStart > touchEnd + 40) rotate('down'); 
+            else if (touchStart < touchEnd - 40) rotate('up');
         }, {passive: true});
 
         window.addEventListener('wheel', e => { 
@@ -216,7 +218,7 @@
             });
         });
 
-        // --- Corrected Live Banner Logic ---
+        // --- Live Banner Logic ---
         function updateBanner() {
             const content = document.getElementById('bannerContent');
             const liveBanner = document.getElementById('liveBanner');
@@ -225,9 +227,7 @@
             const hrs = now.getHours();
             const mins = now.getMinutes();
 
-            // Sunday service: 8:30 AM to 11:00 AM
             const isSundayLive = (day === 0 && ((hrs === 8 && mins >= 30) || (hrs >= 9 && hrs < 11)));
-            // Thursday service: 7:00 AM to 9:00 AM
             const isThursdayLive = (day === 4 && hrs >= 7 && hrs < 9);
 
             if (isSundayLive || isThursdayLive) {
@@ -239,9 +239,9 @@
             }
         }
         updateBanner();
-        setInterval(updateBanner, 30000); // Check service times every 30 seconds
+        setInterval(updateBanner, 30000);
 
-        // --- Retina High-DPI Canvas Particle System ---
+        // --- Particle Canvas System ---
         const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d');
         let parts = [];
         
