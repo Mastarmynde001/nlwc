@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Living Way Chapel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -15,7 +15,6 @@
         body, html {
             margin: 0; padding: 0; overflow: hidden; background: #000;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            touch-action: none;
             overscroll-behavior: none;
         }
 
@@ -36,7 +35,7 @@
             font-size: 10px; transition: 0.3s; text-transform: uppercase;
         }
 
-        /* --- LOGO FIX --- */
+        /* --- LOGO & PULSE ANIMATION --- */
         .logo { 
             width: 180px; 
             max-width: 60%; 
@@ -51,7 +50,14 @@
             background: #000; display: flex; align-items: center; justify-content: center;
             z-index: 9999; transition: opacity 0.8s ease;
         }
-        .loader-logo { width: 60px; filter: invert(1); animation: pulse 1.5s infinite; }
+        
+        /* Keyframe fix added */
+        .loader-logo { width: 60px; filter: invert(1); animation: pulse 1.5s infinite ease-in-out; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.6; }
+        }
 
         #particleCanvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
 
@@ -70,9 +76,8 @@
             position: absolute; width: 100vw; height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; color: white; background-size: cover; background-position: center;
-            background-blend-mode: overlay;
+            background-blend-mode: overlay; background-color: rgba(0,0,0,0.4);
             backface-visibility: hidden;
-            transform: translateZ(0);
         }
 
         .front  { transform: rotateX(0deg) translateZ(50vh); background-image: var(--primary-gradient), url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&q=80&w=1000'); }
@@ -123,47 +128,47 @@
 <body>
 
     <div id="liveBanner"><span id="bannerContent">Syncing...</span></div>
-    <div id="loader"><img src="logo.png" class="loader-logo"></div>
+    <div id="loader"><img src="logo.png" alt="New Living Way Chapel Logo" class="loader-logo"></div>
     <canvas id="particleCanvas"></canvas>
 
     <div class="social-bottom-bar">
-        <a href="https://facebook.com/yourpage" target="_blank" class="social-icon facebook">
+        <a href="https://facebook.com/yourpage" target="_blank" class="social-icon facebook" aria-label="Facebook">
             <i class="fab fa-facebook-f"></i><span class="social-text">Follow us on Facebook</span>
         </a>
-        <a href="https://instagram.com/yourpage" target="_blank" class="social-icon instagram">
+        <a href="https://instagram.com/yourpage" target="_blank" class="social-icon instagram" aria-label="Instagram">
             <i class="fab fa-instagram"></i><span class="social-text">Follow us on Instagram</span>
         </a>
-        <a href="https://www.tiktok.com/@newlivingwaychapel?is_from_webapp=1&sender_device=pc" target="_blank" class="social-icon tiktok">
+        <a href="https://www.tiktok.com/@newlivingwaychapel" target="_blank" class="social-icon tiktok" aria-label="TikTok">
             <i class="fab fa-tiktok"></i><span class="social-text">Follow us on TikTok</span>
         </a>
-        <a href="https://youtube.com/@newlivingwaychapel?si=e44zKInjQkMRXQAt" target="_blank" class="social-icon youtube">
+        <a href="https://youtube.com/@newlivingwaychapel" target="_blank" class="social-icon youtube" aria-label="YouTube">
             <i class="fab fa-youtube"></i><span class="social-text">Subscribe to our YouTube Channel</span>
         </a>
     </div>
 
     <div class="scene" id="mainScene">
         <div class="cube" id="cube">
-            <section class="face front">
-                <img src="logo.png" class="logo">
+            <section class="face front" data-step="0">
+                <img src="logo.png" alt="New Living Way Chapel" class="logo">
                 <div class="glass-card">
                     <h1>WELCOME HOME</h1>
                     <p>New Living Way Chapel: Where faith meets community.</p>
                     <a href="#" class="btn">New Here?</a>
                 </div>
             </section>
-            <section class="face bottom">
+            <section class="face bottom" data-step="1">
                 <div class="glass-card">
                     <h1>OUR MISSION</h1>
                     <p>Building a legacy of love, faith, and spiritual growth for everyone.</p>
                 </div>
             </section>
-            <section class="face back">
+            <section class="face back" data-step="2">
                 <div class="glass-card">
                     <h1>COMMUNITY</h1>
                     <p>Join our weekly small groups and grow together in grace.</p>
                 </div>
             </section>
-            <section class="face top">
+            <section class="face top" data-step="3">
                 <div class="glass-card">
                     <h1>SERVICE TIMES</h1>
                     <p>Sundays @ 8:30 AM<br>Thursdays @ 7:00 AM</p>
@@ -177,6 +182,11 @@
         let currentStep = 0, isSpinning = false;
         const cube = document.getElementById('cube');
 
+        function rotateToStep(step) {
+            currentStep = step;
+            cube.style.transform = `rotateX(${currentStep * 90}deg)`;
+        }
+
         function rotate(dir) {
             if (isSpinning) return;
             isSpinning = true;
@@ -185,47 +195,87 @@
             setTimeout(() => { isSpinning = false; }, 850);
         }
 
+        // --- Touch Swipe Direction Corrected ---
         let touchStart = 0;
         window.addEventListener('touchstart', e => { touchStart = e.touches[0].clientY; }, {passive: true});
         window.addEventListener('touchend', e => {
             let touchEnd = e.changedTouches[0].clientY;
-            if (touchStart > touchEnd + 40) rotate('down');
-            else if (touchStart < touchEnd - 40) rotate('up');
+            if (touchStart > touchEnd + 40) rotate('down');  // Swipe up moves content down
+            else if (touchStart < touchEnd - 40) rotate('up'); // Swipe down moves content up
         }, {passive: true});
 
         window.addEventListener('wheel', e => { 
             if (Math.abs(e.deltaY) > 20) rotate(e.deltaY > 0 ? 'down' : 'up'); 
         }, {passive: true});
 
+        // --- Keyboard Focus Handling ---
+        document.querySelectorAll('.face').forEach(face => {
+            face.addEventListener('focusin', () => {
+                const step = parseInt(face.getAttribute('data-step'), 10);
+                if (!isNaN(step)) rotateToStep(step);
+            });
+        });
+
+        // --- Corrected Live Banner Logic ---
         function updateBanner() {
             const content = document.getElementById('bannerContent');
+            const liveBanner = document.getElementById('liveBanner');
             const now = new Date();
-            const day = now.getDay(), hrs = now.getHours();
-            const isLive = (day === 0 && hrs >= 8 && hrs < 11) || (day === 4 && hrs >= 7 && hrs < 9);
-            if (isLive) {
-                document.getElementById('liveBanner').classList.add('live');
+            const day = now.getDay(); 
+            const hrs = now.getHours();
+            const mins = now.getMinutes();
+
+            // Sunday service: 8:30 AM to 11:00 AM
+            const isSundayLive = (day === 0 && ((hrs === 8 && mins >= 30) || (hrs >= 9 && hrs < 11)));
+            // Thursday service: 7:00 AM to 9:00 AM
+            const isThursdayLive = (day === 4 && hrs >= 7 && hrs < 9);
+
+            if (isSundayLive || isThursdayLive) {
+                liveBanner.classList.add('live');
                 content.innerHTML = `• LIVE NOW <a href="#" class="banner-btn">JOIN</a>`;
             } else {
+                liveBanner.classList.remove('live');
                 content.innerHTML = `NEW LIVING WAY CHAPEL • WELCOME`;
             }
         }
         updateBanner();
+        setInterval(updateBanner, 30000); // Check service times every 30 seconds
 
+        // --- Retina High-DPI Canvas Particle System ---
         const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d');
         let parts = [];
+        
         function resize() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            canvas.style.width = `${window.innerWidth}px`;
+            canvas.style.height = `${window.innerHeight}px`;
+            ctx.scale(dpr, dpr);
+
             parts = [];
             const cnt = window.innerWidth < 600 ? 15 : 40;
-            for(let i=0; i<cnt; i++) parts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, s:Math.random()*1.5});
+            for(let i=0; i<cnt; i++) {
+                parts.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, s: Math.random() * 1.5 });
+            }
         }
+        
         function anim() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
             ctx.fillStyle = "rgba(255,255,255,0.2)";
-            parts.forEach(p => { p.y -= 0.3; if(p.y < 0) p.y = canvas.height; ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fill(); });
+            parts.forEach(p => { 
+                p.y -= 0.3; 
+                if(p.y < 0) p.y = window.innerHeight; 
+                ctx.beginPath(); 
+                ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2); 
+                ctx.fill(); 
+            });
             requestAnimationFrame(anim);
         }
-        window.addEventListener('resize', resize); resize(); anim();
+        
+        window.addEventListener('resize', resize); 
+        resize(); 
+        anim();
 
         window.onload = () => {
             document.getElementById('loader').style.opacity = '0';
